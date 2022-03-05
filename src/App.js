@@ -34,6 +34,8 @@ export default function CheckboxesTags() {
 
   const allSelected = top100Films.length === value.length;
 
+  console.log("allSelectedallSelected", allSelected);
+
   const handleToggleOption = (selectedOptions) => setValue(selectedOptions);
   const handleClearOptions = () => setValue([]);
 
@@ -66,14 +68,14 @@ export default function CheckboxesTags() {
     if (reason === "select-option" || reason === "remove-option") {
       if (selectedOptions.find((option) => option.value === "select-all")) {
         handleToggleSelectAll();
-        let result = [];
-        result = top100Films.filter((el) => el.value !== "select-all");
+        // let result = [];
+        // result = top100Films.filter((el) => el.value !== "select-all");
         // return onChange(result);
-        setValue(result);
+        // setValue(result);
       } else {
         handleToggleOption && handleToggleOption(selectedOptions);
         // return onChange(selectedOptions);
-        setValue(selectedOptions);
+        // setValue(selectedOptions);ss
       }
     } else if (reason === "clear") {
       handleClearOptions && handleClearOptions();
