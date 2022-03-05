@@ -3,34 +3,92 @@
 import React from "react";
 import Checkbox from "@material-ui/core/Checkbox";
 import TextField from "@material-ui/core/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+// import Autocomplete from "@material-ui/lab/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import Autocomplete, {
+  createFilterOptions,
+} from "@material-ui/lab/Autocomplete";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CheckboxesTags() {
+  const filter = createFilterOptions();
   // inputValue: what we enter
   // value:what we select
   // value onchange works together
   // inputvalue and oninputchnage work together
   // we can write them just to have control otherwise it works automatically for normal features
 
-  const [value, setValue] = React.useState([
-    { title: "The Shawshank Redemption", year: 1994 },
-    { title: "The Godfather", year: 1972 },
-    { title: "The Godfather: Part II", year: 1974 },
-  ]); //it is array of objects
+  const [value, setValue] = React.useState([]); //it is array of objects
+
+  //to get initially filled values
+  // const [value, setValue] = React.useState([
+  //   { title: "The Shawshank Redemption", year: 1994 },
+  //   { title: "The Godfather", year: 1972 },
+  //   { title: "The Godfather: Part II", year: 1974 },
+  // ]);
+
   const [inputValue, setInputValue] = React.useState("");
+
+  const allSelected = top100Films.length === value.length;
+
+  const handleToggleOption = (selectedOptions) => setValue(selectedOptions);
+  const handleClearOptions = () => setValue([]);
+
+  const handleSelectAll = (isSelected) => {
+    if (isSelected) {
+      setValue(top100Films);
+    } else {
+      handleClearOptions();
+    }
+  };
+
+  const handleToggleSelectAll = () => {
+    handleSelectAll && handleSelectAll(!allSelected);
+  };
+
+  const handleChange = (event, selectedOptions, reason) => {
+    console.log(
+      "qqqqqqqqqqq",
+      event,
+      "1111111111",
+      selectedOptions,
+      "22222222",
+      reason
+    );
+    console.log(
+      "xxxxxxxxxxxxxxxx",
+      selectedOptions.find((option) => option.year === "select-all")
+    );
+    // to check if select all is checked or not
+    if (reason === "select-option" || reason === "remove-option") {
+      if (selectedOptions.find((option) => option.value === "select-all")) {
+        handleToggleSelectAll();
+        let result = [];
+        result = top100Films.filter((el) => el.value !== "select-all");
+        // return onChange(result);
+        setValue(result);
+      } else {
+        handleToggleOption && handleToggleOption(selectedOptions);
+        // return onChange(selectedOptions);
+        setValue(selectedOptions);
+      }
+    } else if (reason === "clear") {
+      handleClearOptions && handleClearOptions();
+    }
+  };
+
   return (
     <Autocomplete
       limitTags={2}
       value={value}
-      onChange={(event, newValue) => {
-        console.log("newValue", newValue);
-        setValue(newValue);
-      }}
+      onChange={handleChange}
+      // onChange={(event, newValue) => {
+      //   console.log("newValue", newValue);
+      //   setValue(newValue);
+      // }}
       inputValue={inputValue}
       onInputChange={(event, newInputValue) => {
         console.log("inputValue", inputValue);
@@ -40,22 +98,35 @@ export default function CheckboxesTags() {
       id="checkboxes-tags-demo"
       options={top100Films}
       disableCloseOnSelect
-      getOptionLabel={(option) => option.title}
+      getOptionLabel={(option) => option.label}
+      // to modify the available lisyt of options we use filteroptions
+      filterOptions={(options, params) => {
+        const filtered = filter(options, params);
+        return [{ label: "Select All", value: "select-all" }, ...filtered];
+      }}
       getOptionSelected={(option, value) => {
         console.log("seected", option, value);
-        return option.year === value.year;
+        return option.value === value.value;
       }}
-      renderOption={(option, { selected }) => (
-        <React.Fragment>
-          <Checkbox
-            icon={icon}
-            checkedIcon={checkedIcon}
-            style={{ marginRight: 8 }}
-            checked={selected}
-          />
-          {option.title}
-        </React.Fragment>
-      )}
+      renderOption={(option, { selected }) => {
+        const selectAllProps =
+          option.value === "select-all" // To control the state of 'select-all' checkbox
+            ? { checked: allSelected }
+            : {};
+
+        return (
+          <React.Fragment>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={selected}
+              {...selectAllProps}
+            />
+            {option.label}
+          </React.Fragment>
+        );
+      }}
       style={{ width: 500 }}
       // renderinput is basically the text input we see on screen
       renderInput={(params) => {
@@ -74,37 +145,12 @@ export default function CheckboxesTags() {
 }
 
 // Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
+
 const top100Films = [
-  { title: "The Shawshank Redemption", year: 1994 },
-  { title: "The Godfather", year: 1972 },
-  { title: "The Godfather: Part II", year: 1974 },
-  { title: "The Dark Knight", year: 2008 },
-  { title: "12 Angry Men", year: 1957 },
-  { title: "Schindler's List", year: 1993 },
-  { title: "Pulp Fiction", year: 1994 },
-  { title: "The Lord of the Rings: The Return of the King", year: 2003 },
-  { title: "The Good, the Bad and the Ugly", year: 1966 },
-  { title: "Fight Club", year: 1999 },
-  { title: "The Lord of the Rings: The Fellowship of the Ring", year: 2001 },
-  { title: "Star Wars: Episode V - The Empire Strikes Back", year: 1980 },
-  { title: "Forrest Gump", year: 1994 },
-  { title: "Inception", year: 2010 },
-  { title: "The Lord of the Rings: The Two Towers", year: 2002 },
-  { title: "One Flew Over the Cuckoo's Nest", year: 1975 },
-  { title: "Goodfellas", year: 1990 },
-  { title: "The Matrix", year: 1999 },
-  { title: "Seven Samurai", year: 1954 },
-  { title: "Star Wars: Episode IV - A New Hope", year: 1977 },
-  { title: "City of God", year: 2002 },
-  { title: "Se7en", year: 1995 },
-  { title: "The Silence of the Lambs", year: 1991 },
-  { title: "It's a Wonderful Life", year: 1946 },
-  { title: "Life Is Beautiful", year: 1997 },
-  { title: "The Usual Suspects", year: 1995 },
-  { title: "Léon: The Professional", year: 1994 },
-  { title: "Spirited Away", year: 2001 },
-  { title: "Saving Private Ryan", year: 1998 },
-  { title: "Once Upon a Time in the West", year: 1968 },
-  { title: "American History X", year: 1998 },
-  { title: "Interstellar", year: 2014 },
+  { label: "foo", value: "foo" },
+  { label: "bar", value: "bar" },
+  { label: "jar", value: "jar" },
+  { label: "nar", value: "nar" },
+  { label: "mar", value: "mar" },
+  { label: "far", value: "far" },
 ];
